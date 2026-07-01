@@ -1,0 +1,206 @@
+import 'package:flutter/material.dart';
+
+import 'data/bible_books.dart';
+import 'data/bible_repository.dart';
+import 'models/verse.dart';
+import 'screens/bookmarks_screen.dart';
+import 'screens/reader_screen.dart';
+import 'screens/search_screen.dart';
+import 'screens/start_screen.dart';
+import 'services/bookmark_service.dart';
+
+void main() {
+  runApp(const BibleReaderApp());
+}
+
+class BibleReaderApp extends StatelessWidget {
+  const BibleReaderApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '성경 뷰어',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.teal,
+        brightness: Brightness.dark,
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFF0F1923),
+        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF0F1923)),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF243144),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFFCDEDE3),
+          selectedItemColor: Color(0xFF0F1923),
+          unselectedItemColor: Color(0xFF5C7A72),
+          type: BottomNavigationBarType.fixed,
+        ),
+      ),
+      home: const RootPage(),
+    );
+  }
+}
+
+class RootPage extends StatefulWidget {
+  const RootPage({super.key});
+
+  @override
+  State<RootPage> createState() => _RootPageState();
+}
+
+class _RootPageState extends State<RootPage> {
+  final _repository = BibleRepository();
+  final _bookmarkService = BookmarkService();
+
+  bool _isLoading = true;
+  bool _started = false;
+  int _selectedIndex = 0;
+
+  String _selectedBook = bibleBookNames.first;
+  int _selectedChapter = 1;
+  String _selectedTranslation = 'korean';
+  Set<String> _bookmarkedRefs = {};
+  bool _isOldTestament = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _repository.load();
+    final refs = await _bookmarkService.loadRefs();
+    setState(() {
+      _bookmarkedRefs = refs;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _toggleBookmark(Verse verse) async {
+    final refs = await _bookmarkService.toggle(verse);
+    setState(() => _bookmarkedRefs = refs);
+  }
+
+  void _goToVerse(Verse verse) {
+    setState(() {
+      _selectedBook = verse.book;
+      _selectedChapter = verse.chapter;
+      _selectedIndex = 0;
+      _isOldTestament = isOldTestamentBook(verse.book);
+    });
+  }
+
+  void _stepChapter(int delta) {
+    setState(() {
+      final bookIndex = bibleBookNames.indexOf(_selectedBook);
+      final chapterCount = bibleBookChapterCounts[_selectedBook] ?? 1;
+      final newChapter = _selectedChapter + delta;
+      if (newChapter >= 1 && newChapter <= chapterCount) {
+        _selectedChapter = newChapter;
+      } else if (newChapter > chapterCount &&
+          bookIndex < bibleBookNames.length - 1) {
+        _selectedBook = bibleBookNames[bookIndex + 1];
+        _selectedChapter = 1;
+      } else if (newChapter < 1 && bookIndex > 0) {
+        _selectedBook = bibleBookNames[bookIndex - 1];
+        _selectedChapter = bibleBookChapterCounts[_selectedBook] ?? 1;
+      }
+      _isOldTestament = isOldTestamentBook(_selectedBook);
+    });
+  }
+
+  void _onTestamentChanged(bool isOld) {
+    setState(() {
+      _isOldTestament = isOld;
+      final books = isOld ? bibleOldTestamentBooks : bibleNewTestamentBooks;
+      if (!books.contains(_selectedBook)) {
+        _selectedBook = books.first;
+        _selectedChapter = 1;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_started) {
+      return StartScreen(onStart: () => setState(() => _started = true));
+    }
+
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final screens = [
+      ReaderScreen(
+        repository: _repository,
+        bookNames: _isOldTestament ? bibleOldTestamentBooks : bibleNewTestamentBooks,
+        selectedBook: _selectedBook,
+        selectedChapter: _selectedChapter,
+        selectedTranslation: _selectedTranslation,
+        bookmarkedRefs: _bookmarkedRefs,
+        onBookChanged: (book) => setState(() {
+          _selectedBook = book;
+          _selectedChapter = 1;
+        }),
+        onChapterChanged: (chapter) =>
+            setState(() => _selectedChapter = chapter),
+        onTranslationChanged: (translation) =>
+            setState(() => _selectedTranslation = translation),
+        onToggleBookmark: _toggleBookmark,
+        onPrevChapter: () => _stepChapter(-1),
+        onNextChapter: () => _stepChapter(1),
+      ),
+      SearchScreen(
+        repository: _repository,
+        selectedTranslation: _selectedTranslation,
+        bookmarkedRefs: _bookmarkedRefs,
+        onToggleBookmark: _toggleBookmark,
+        onSelectVerse: _goToVerse,
+      ),
+      BookmarksScreen(
+        repository: _repository,
+        selectedTranslation: _selectedTranslation,
+        bookmarkedRefs: _bookmarkedRefs,
+        onToggleBookmark: _toggleBookmark,
+        onSelectVerse: _goToVerse,
+      ),
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('[나의 성경]'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: SegmentedButton<bool>(
+              segments: const [
+                ButtonSegment(value: true, label: Text('구약')),
+                ButtonSegment(value: false, label: Text('신약')),
+              ],
+              selected: {_isOldTestament},
+              onSelectionChanged: (selection) =>
+                  _onTestamentChanged(selection.first),
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(child: screens[_selectedIndex]),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: '읽기'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: '북마크'),
+        ],
+      ),
+    );
+  }
+}
