@@ -24,6 +24,7 @@ class VerseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
+      contentPadding: const EdgeInsets.only(left: 16, right: 4),
       title: Text(
         showReference ? verse.reference : '${verse.verse}. $text',
         style: TextStyle(
@@ -39,6 +40,10 @@ class VerseTile extends StatelessWidget {
           isBookmarked ? Icons.star : Icons.star_border,
           color: isBookmarked ? Colors.amber : Colors.grey,
         ),
+        iconSize: 20,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        visualDensity: VisualDensity.compact,
         onPressed: onToggleBookmark,
       ),
     );
