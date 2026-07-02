@@ -24,7 +24,8 @@ class VerseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      contentPadding: const EdgeInsets.only(left: 16, right: 4),
+      contentPadding: const EdgeInsets.only(left: 4, right: 4),
+      horizontalTitleGap: 4,
       title: Text(
         showReference ? verse.reference : '${verse.verse}. $text',
         style: TextStyle(
