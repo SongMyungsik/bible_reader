@@ -10,6 +10,7 @@ class BookmarksScreen extends StatelessWidget {
   final Set<String> bookmarkedRefs;
   final ValueChanged<Verse> onToggleBookmark;
   final ValueChanged<Verse> onSelectVerse;
+  final double fontSize;
 
   const BookmarksScreen({
     super.key,
@@ -18,6 +19,7 @@ class BookmarksScreen extends StatelessWidget {
     required this.bookmarkedRefs,
     required this.onToggleBookmark,
     required this.onSelectVerse,
+    this.fontSize = 16,
   });
 
   @override
@@ -39,6 +41,7 @@ class BookmarksScreen extends StatelessWidget {
           isBookmarked: true,
           onToggleBookmark: () => onToggleBookmark(verse),
           onTap: () => onSelectVerse(verse),
+          fontSize: fontSize,
         );
       },
     );

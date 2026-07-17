@@ -10,6 +10,7 @@ class SearchScreen extends StatefulWidget {
   final Set<String> bookmarkedRefs;
   final ValueChanged<Verse> onToggleBookmark;
   final ValueChanged<Verse> onSelectVerse;
+  final double fontSize;
 
   const SearchScreen({
     super.key,
@@ -18,6 +19,7 @@ class SearchScreen extends StatefulWidget {
     required this.bookmarkedRefs,
     required this.onToggleBookmark,
     required this.onSelectVerse,
+    this.fontSize = 16,
   });
 
   @override
@@ -82,6 +84,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           onToggleBookmark: () =>
                               widget.onToggleBookmark(verse),
                           onTap: () => widget.onSelectVerse(verse),
+                          fontSize: widget.fontSize,
                         );
                       },
                     ),

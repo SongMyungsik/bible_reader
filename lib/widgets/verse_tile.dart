@@ -9,6 +9,7 @@ class VerseTile extends StatelessWidget {
   final VoidCallback onToggleBookmark;
   final VoidCallback? onTap;
   final bool showReference;
+  final double fontSize;
 
   const VerseTile({
     super.key,
@@ -18,6 +19,7 @@ class VerseTile extends StatelessWidget {
     required this.onToggleBookmark,
     this.onTap,
     this.showReference = false,
+    this.fontSize = 16,
   });
 
   @override
@@ -29,13 +31,15 @@ class VerseTile extends StatelessWidget {
       title: Text(
         showReference ? verse.reference : '${verse.verse}. $text',
         style: TextStyle(
-          fontSize: 16,
+          fontSize: fontSize,
           height: 1.4,
           fontWeight: FontWeight.bold,
           color: isBookmarked ? Colors.amber : null,
         ),
       ),
-      subtitle: showReference ? Text(text) : null,
+      subtitle: showReference
+          ? Text(text, style: TextStyle(fontSize: fontSize - 2))
+          : null,
       trailing: IconButton(
         icon: Icon(
           isBookmarked ? Icons.star : Icons.star_border,

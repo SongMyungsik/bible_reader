@@ -21,6 +21,7 @@ class ReaderScreen extends StatelessWidget {
   final ValueChanged<Verse> onToggleBookmark;
   final VoidCallback onPrevChapter;
   final VoidCallback onNextChapter;
+  final double fontSize;
 
   const ReaderScreen({
     super.key,
@@ -36,6 +37,7 @@ class ReaderScreen extends StatelessWidget {
     required this.onToggleBookmark,
     required this.onPrevChapter,
     required this.onNextChapter,
+    this.fontSize = 16,
   });
 
   @override
@@ -181,6 +183,7 @@ class ReaderScreen extends StatelessWidget {
                       text: verse.textFor(selectedTranslation),
                       isBookmarked: bookmarkedRefs.contains(verse.reference),
                       onToggleBookmark: () => onToggleBookmark(verse),
+                      fontSize: fontSize,
                     );
                   },
                 ),
