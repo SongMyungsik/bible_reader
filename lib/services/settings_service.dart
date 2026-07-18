@@ -12,7 +12,7 @@ const List<Color> accentColorOptions = [
 ];
 
 /// 성경 본문 글씨 크기 5단계.
-const List<double> verseFontSizes = [14, 16, 18, 20, 22];
+const List<double> verseFontSizes = [14, 17.5, 21, 24.5, 28];
 
 const int _defaultFontSizeIndex = 1;
 
