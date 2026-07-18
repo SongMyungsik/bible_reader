@@ -50,10 +50,9 @@ class SettingsScreen extends StatelessWidget {
             final color = accentColorOptions[i];
             final selected = settings.accentIndex == i;
             final onColor =
-                ThemeData.estimateBrightnessForColor(color) ==
-                        Brightness.dark
-                    ? Colors.white
-                    : Colors.black87;
+                ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+                ? Colors.white
+                : Colors.black87;
             return GestureDetector(
               onTap: () => settings.setAccentIndex(i),
               child: AnimatedContainer(
@@ -166,7 +165,7 @@ class _FontSizeSelector extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(count, (i) {
                     final selected = settings.fontSizeIndex == i;
-                    final dotSize = 12.0 + i * 2.5;
+                    final dotSize = 12.0 + i * 4;
                     return GestureDetector(
                       onTap: () => settings.setFontSizeIndex(i),
                       child: Container(
@@ -198,7 +197,7 @@ class _FontSizeSelector extends StatelessWidget {
             ),
           ),
         ),
-        const Text('가', style: TextStyle(fontSize: 22)),
+        const Text('가', style: TextStyle(fontSize: 28)),
       ],
     );
   }
